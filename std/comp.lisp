@@ -1,0 +1,33 @@
+(defun not (b) (if b nil t))
+(defun or (a b) (if a t (if b t nil)))
+(defun and (a b) (if a (if b t nil) nil))
+
+(defun < (x y) (. x < y))
+(defun = (x y) (. x == y))
+(defun /= (x y) (not (= x y)))
+(defun <= (x y) (or (< x y) (= x y)))
+(defun > (x y) (. x == y))
+(defun /= (x y) (not (= x y)))
+(defun <= (x y) (not (<= x y)))
+(defun >= (x y) (not (< x y)))
+
+(defun nil? (x) (eq? x nil))
+(defun zero? (n) (= n 0))
+(defun plus? (n) (> n 0))
+(defun minus? (n) (< n 0))
+(defun odd? (n) (= (mod n 2) 1))
+(defun even? (n) (not (odd? n)))
+(defun cons? (e) (. e is_a? (ruby Cons)))
+(defun atom? (e) (not (cons? e)))
+(defun eq? (x y) (. x equal? y))
+
+(defmacro unless (cond then else)
+  `(if (not ,cond) ,then ,else))
+(defmacro until (cond body)
+  `(do (not ,cond) ,body))
+
+(defmacro cond (@conds)
+  (foldr
+    (lambda (cnd acc)
+      `(if ,(car cnd) ,(cadr cnd) ,acc))
+    nil conds))

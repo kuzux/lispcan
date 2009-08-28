@@ -1,0 +1,6 @@
+(defun to-int (s) (. s to_i))
+(defun to-num (s) (. s to_f))
+(defun to-str (n) (. n to_s))
+(defun to-sym (s) (. s to_sym))
+(defun to-ary (cn) (. cn arrayify))
+(defun to-lambda (x) (lambda () x))
