@@ -1,4 +1,4 @@
-(defun hash-new () (. (ruby Hash) new))
+(defmacro hash-new () `(. (ruby Hash) new))
 (defun hash-get (key hash) (. hash "[]" key))
 (defun hash-set (key val hash) (. hash "[]=" key val))
 

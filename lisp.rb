@@ -51,12 +51,13 @@ class Env
 end
 
 class Lambda
-  def initialize env, forms, args, *code
+  def initialize env, forms, args, st, *code
     @env, @forms = env,forms
     @args = args.arrayify
     @arity = @args.size
     @arity *= -1 if @args.last.to_s =~ /^\@/
     @code = code
+    @stack_trace = st
   end
   
   def call *args
@@ -65,6 +66,9 @@ class Lambda
     else
       raise "Expected at least #{@arity.abs - 1} arguments, got #{args.size}" unless args.size >= @arity.abs - 1
     end
+    
+    @env.lookup(:"*interpreter_*").push(:"<LAMBDA>") if @st
+    
     newenv = Env.new(@env)
     newforms = Env.new(@forms)
     if @arity > 0
@@ -85,11 +89,13 @@ class Lambda
     if res==true||res==false||res==nil
       res = res.to_sym
     end
+    @env.lookup(:"*interpreter_*").pop if @st
+    
     res
   end
   
   def to_sexp
-    "(lambda #{@args.to_sexp} #{@code.map{|e| e.to_sexp}.join(" ")})"
+    "(lambda #{@args.consify.to_sexp} #{@code.map{|e| e.to_sexp}.join(" ")})"
   end
   
   def to_proc
@@ -131,8 +137,12 @@ end
 class Cons
   def lispeval env, forms
     return forms.lookup(car).call(env, forms, *cdr.arrayify) if forms && forms.defined?(car)
-    func = car.lispeval(env,forms) 
-    func.call(*cdr.arrayify.map{|x| x.lispeval(env,forms)})
+    func = car.lispeval(env,forms)
+    args = cdr.arrayify.map{|x| x.lispeval(env,forms)}
+    env.lookup(:"*interpreter_*").stack_trace << car
+    res = func.call(*args)
+    env.lookup(:"*interpreter_*").stack_trace.pop
+    res
   end
 end
 
@@ -214,7 +224,8 @@ FORMS = {
   :set_ => lambda{|env,forms,sym,value| env.set(sym.to_sym,value.lispeval(env,forms))},
   :if => lambda{|env,forms,cond,xthen,xelse| (cond.lispeval(env,forms) != :nil) ? xthen.lispeval(env,forms) : xelse.lispeval(env,forms)},
   :do => lambda{|env,forms,cond,body| body.lispeval(env,forms) while (cond.lispeval(env,forms) != :nil)},
-  :lambda => lambda{|env,forms,args,*code| Lambda.new(env,forms,args,*code)},
+  :lambda => lambda{|env,forms,args,*code| Lambda.new(env,forms,args,true,*code)},
+  :lambda_ => lambda{|env,forms,args,*code| Lambda.new(env,forms,args,false,*code)},
   :defmacro_ => lambda do |env,forms,name,exp|
     func = exp.lispeval(env,forms)
     forms.define(name, lambda{|env2,forms2,*rest| func.call(*rest).lispeval(env2,forms2)})
@@ -234,11 +245,13 @@ FORMS = {
 STDLIB = "std.lisp"
 
 class Interpreter
+  attr_reader :stack_trace
   def initialize defaults = DEFAULTS, forms = FORMS, stdlib = STDLIB
     @env = Env.new nil, defaults
     @forms = Env.new nil, forms
     @env.define(:"*interpreter_*",self)
     @loadpath = [File.join(File.dirname(__FILE__), "std")]
+    @stack_trace = [:"TOPLEVEL"]
     load_file stdlib
   end
   
@@ -267,6 +280,7 @@ class Interpreter
         puts self.eval(line).to_sexp
       rescue StandardError => e
         puts "ERROR: #{e}"
+        puts @stack_trace.to_sexp
       end
     end
   end
@@ -291,6 +305,7 @@ class Interpreter
     end
   rescue StandardError => e
     puts "ERROR: #{e}"
+    puts @stack_trace.to_sexp
   end
 end
 

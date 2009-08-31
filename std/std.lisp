@@ -1,21 +1,25 @@
-(defmacro_ defmacro (lambda (name args body)
-  `(defmacro_ ,name (lambda ,args ,body))))
+(defmacro_ defmacro (lambda_ (name args body)
+  `(defmacro_ ,name (lambda_ ,args ,body))))
 (defmacro defun (name args body)
-  `(define ,name (lambda ,args ,body)))
+  `(define ,name (lambda_ ,args ,body)))
 (defun apply (fn @args) (eval (cons fn args)))
 
 (defmacro set! (lhs rhs)
   (if (cons? lhs)
-    (cond 
+    (cond
+      ((= (car lhs) '+) `(set! ,(cadr lhs) (- ,rhs ,(caddr lhs))))
+      ((= (car lhs) '-) `(set! ,(cadr lhs) (+ ,rhs ,(caddr lhs))))
+      ((= (car lhs) '*) `(set! ,(cadr lhs) (/ ,rhs ,(caddr lhs))))
+      ((= (car lhs) '/) `(set! ,(cadr lhs) (* ,rhs ,(caddr lhs))))
       ((= (car lhs) 'car) `(rplaca! ,(cadr lhs) ,rhs)))
     `(set_ ,lhs ,rhs)))
 
 (defmacro \ (args code) `(lambda ,args ,code))
 (defmacro progn (@code) `(eval ',code))
 
-(defmacro let1 (binding body) 
+(defmacro let1 (binding body)
   `((lambda 
-     (,(car binding)) ,body) 
+     (,(car binding)) ,body)
   ,(car (cdr binding))))
 (defmacro let (bindings body)
   (foldr
@@ -40,11 +44,11 @@
 (load "doc.lisp")
 (load "conv.lisp")
 
-(defmacro defstruct (name attrs) 
+(defun defstruct (name attrs)
   (let1 (str (. (ruby Struct) new (vector attrs)))
     `(progn
        (defun (to-sym (+ "make-" (to-str ,name))) (@atts) (. ,str new atts))
-       ,(map (lambda (attr) `(defun (to-sym (+ (to-str ,name) (+ "-" ,attr))))) attrs)
+       ,(map (\ (attr) `(defun (to-sym (+ (to-str ,name) (+ "-" ,attr))))) attrs)
        (defun (to-sym (+ "is-" (+ ,name "?"))) (x) (= (. x class) str)))))
 
 (defun regexp (rx) (. (ruby Regexp) new rx))

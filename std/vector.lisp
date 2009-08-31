@@ -1,7 +1,7 @@
 (defmacro vector (lst)
   `(. (ruby Array) from_cons
     ',(map (lambda (x) (eval x)) lst)))
-(defun make-vector (fn n) (. (ruby array) new n fn))
+(defun make-vector (fn n) (. (ruby Array) new n fn))
 (defun vector-push (vec elem) (. vec push elem))
 (defun vector-pop (vec) (. vec pop))
 (defun vector-len (vec) (. vec length))

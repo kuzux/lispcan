@@ -1,6 +1,6 @@
 (define *documentation_* (hash-new))
-(defun document-fn (fns doc) 
-  (if (atom? fns) 
+(defun document-fn (fns doc)
+  (if (atom? fns)
     (hash-set fns doc *documentation_*)
     (map (\ (n) (hash-set n doc *documentation_*)) fns)))
     
