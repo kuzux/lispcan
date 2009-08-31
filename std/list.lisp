@@ -35,6 +35,8 @@
 (defun cdddar (x) (cdr (cdr (cdr (car x)))))
 (defun cddddr (x) (cdr (cdr (cdr (cdr x)))))
 
+(defun rplaca! (list val) (. list car= val))
+
 (defmacro dotimes (binding code)
   `(. ,(cadr binding) times
     (lambda (,(car binding)) ,code)))

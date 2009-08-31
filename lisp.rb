@@ -2,7 +2,8 @@
 require 'lisp_parser'
 
 class Cons
-  attr_reader :car, :cdr
+  attr_reader :cdr
+  attr_accessor :car
   def initialize car, cdr
     @car, @cdr = car, cdr
   end
@@ -210,7 +211,7 @@ FORMS = {
   :quote => lambda{|env,forms,exp| exp},
   :quasiquote => lambda {|env,forms,exp| quasiquote(env,forms,exp)},
   :define => lambda {|env,forms,sym,value| env.define(sym,value.lispeval(env,forms))},
-  :set! => lambda{|env,forms,sym,value| env.set(sym.to_sy.to_sym,value.lispeval(env,forms))},
+  :set_ => lambda{|env,forms,sym,value| env.set(sym.to_sym,value.lispeval(env,forms))},
   :if => lambda{|env,forms,cond,xthen,xelse| (cond.lispeval(env,forms) != :nil) ? xthen.lispeval(env,forms) : xelse.lispeval(env,forms)},
   :do => lambda{|env,forms,cond,body| body.lispeval(env,forms) while (cond.lispeval(env,forms) != :nil)},
   :lambda => lambda{|env,forms,args,*code| Lambda.new(env,forms,args,*code)},

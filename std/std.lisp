@@ -4,6 +4,12 @@
   `(define ,name (lambda ,args ,body)))
 (defun apply (fn @args) (eval (cons fn args)))
 
+(defmacro set! (lhs rhs)
+  (if (cons? lhs)
+    (cond 
+      ((= (car lhs) 'car) `(rplaca! ,(cadr lhs) ,rhs)))
+    `(set_ ,lhs ,rhs)))
+
 (defmacro \ (args code) `(lambda ,args ,code))
 (defmacro progn (@code) `(eval ',code))
 
