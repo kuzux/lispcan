@@ -11,6 +11,10 @@
       ((= (car lhs) '-) `(set! ,(cadr lhs) (+ ,rhs ,(caddr lhs))))
       ((= (car lhs) '*) `(set! ,(cadr lhs) (/ ,rhs ,(caddr lhs))))
       ((= (car lhs) '/) `(set! ,(cadr lhs) (* ,rhs ,(caddr lhs))))
+      ((= (car lhs) 'sqrt) `(set! ,(cadr lhs) (* ,rhs ,rhs)))
+      ((= (car lhs) 'sin) `(set! ,(cadr lhs) (asin ,rhs)))
+      ((= (car lhs) 'cos) `(set! ,(cadr lhs) (acos ,rhs)))
+      ((= (car lhs) 'tan) `(set! ,(cadr lhs) (atan ,rhs)))
       ((= (car lhs) 'car) `(rplaca! ,(cadr lhs) ,rhs)))
     `(set_ ,lhs ,rhs)))
 

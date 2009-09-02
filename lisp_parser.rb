@@ -28,12 +28,18 @@ module SExpressionParser
   Quoted = char("'") >> lazy{Value}.map{|value| [:quote, value] }
   Quasiquoted = char("`") >> lazy{Value}.map{|value| [:quasiquote, value]}
   Commaed = char(",") >> lazy{Value}.map{|value| [:comma_, value]}
-  Value = whitespace.many_ >> alt(Quoted, Quasiquoted, Commaed, List, Vector, String, Symbol, Number) << whitespace.many_
+  Commented = char(";") >> lazy{Value}.map{|value| nil}
+  Value = whitespace.many_ >> alt(Quoted, Quasiquoted, Commaed, Commented, List, Vector, String, Symbol, Number) << whitespace.many_
   Values = Value.many
   Parser = Values << eof
 
   def self.parse(text)
-    Parser.parse(text)
+    denilify Parser.parse(text)
+  end
+  
+  protected
+  def self.denilify(list)
+    list.reject{|x| x.nil?}.map{|x| x.is_a?(Array) ? denilify(x) : x}
   end
 end
 

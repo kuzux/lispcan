@@ -67,6 +67,7 @@ class Lambda
       raise "Expected at least #{@arity.abs - 1} arguments, got #{args.size}" unless args.size >= @arity.abs - 1
     end
     
+    #@env.define(:"ASD", lambda{|*args| self.call(*args)})
     @env.lookup(:"*interpreter_*").push(:"<LAMBDA>") if @st
     
     newenv = Env.new(@env)
@@ -157,6 +158,7 @@ class Array
   def consify
     map{|x|x.consify}.reverse.inject(:nil){|cdr,car| Cons.new(car,cdr)}
   end
+  def arrayify; self; end
 end
 
 class Cons
@@ -299,7 +301,6 @@ class Interpreter
   end
   
   def eval_file contents
-    contents.gsub!(/^\s*;;.*$/,"")
     contents.parse_sexp.each do |expr|
       expr.consify.lispeval(@env,@forms)
     end
