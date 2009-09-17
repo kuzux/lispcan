@@ -240,7 +240,6 @@ FORMS = {
   :if => lambda{|env,forms,cond,xthen,xelse| (cond.lispeval(env,forms) != :nil) ? xthen.lispeval(env,forms) : xelse.lispeval(env,forms)},
   :do => lambda{|env,forms,cond,body| body.lispeval(env,forms) while (cond.lispeval(env,forms) != :nil)},
   :lambda => lambda{|env,forms,args,*code| Lambda.new(env,forms,args,true,*code)},
-  :lambda_ => lambda{|env,forms,args,*code| Lambda.new(env,forms,args,false,*code)},
   :defmacro_ => lambda do |env,forms,name,exp|
     func = exp.lispeval(env,forms)
     forms.define(name, lambda{|env2,forms2,*rest| func.call(*rest).lispeval(env2,forms2)})

@@ -1,8 +1,10 @@
-(defmacro_ defmacro (lambda_ (name args body)
-  `(defmacro_ ,name (lambda_ ,args ,body))))
+(defmacro_ defmacro (lambda (name args body)
+  `(defmacro_ ,name (lambda ,args ,body))))
 (defmacro defun (name args body)
-  `(define ,name (lambda_ ,args ,body)))
+  `(define ,name (lambda ,args ,body)))
 (defun apply (fn @args) (eval (cons fn args)))
+
+(defmacro defrmacro (chr args code) `(defmacro ,(to-sym (+ "reader-macro-" (to-str chr))) ,args ,code))
 
 (define t 't)
 (define nil 'nil)

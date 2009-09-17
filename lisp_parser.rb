@@ -30,7 +30,8 @@ module SExpressionParser
   Quasiquoted = char("`") >> lazy{Value}.map{|value| [:quasiquote, value]}
   Unquoted = char(",") >> lazy{Value}.map{|value| [:unquote, value]}
   Commented = char(";") >> lazy{Value}.map{|value| nil}
-  Value = whitespace.many_ >> alt(Quoted, Quasiquoted, Unquoted, Commented, List, Vector, Hash, String, Symbol, Number) << whitespace.many_
+	ReaderMacro = sequence(char("#"), regexp(/[A-Za-z#{Special}]/), lazy{Value}){|_,char,exp| [:"reader-macro-#{char}", exp]}
+  Value = whitespace.many_ >> alt(ReaderMacro, Quoted, Quasiquoted, Unquoted, Commented, List, Vector, Hash, String, Symbol, Number) << whitespace.many_
   Values = Value.many
   Parser = Values << eof
 
