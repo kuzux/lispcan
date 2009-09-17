@@ -1,4 +1,7 @@
-(defmacro hash-new () `(. (ruby Hash) new))
+(defmacro hash (lst) `(. (ruby Hash) from_cons ,lst))
+(defmacro quoted-hash (lst) `(. (ruby Hash) from_cons ',lst))
+
+(defun hash-new () (hash '()))
 (defun hash-get (key hash) (. hash "[]" key))
 (defun hash-set (key val hash) (. hash "[]=" key val))
 

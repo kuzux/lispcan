@@ -4,6 +4,11 @@
   `(define ,name (lambda_ ,args ,body)))
 (defun apply (fn @args) (eval (cons fn args)))
 
+(define t 't)
+(define nil 'nil)
+
+(defun list (@lst) (if (= (cdr lst) nil) (car lst) lst))
+
 (defmacro set! (lhs rhs)
   (if (cons? lhs)
     (cond

@@ -25,11 +25,12 @@ module SExpressionParser
   String = stringer(%q{"}, %q{"}, "n" => "\n", "t" => "\t")
   List = char('(') >> lazy{Values} << char(')')
   Vector = char('[') >> lazy{Values}.map{|value| [:vector, value] } << char(']')
+  Hash = char('{') >> lazy{Values}.map{|value| [:hash, value] } << char('}')
   Quoted = char("'") >> lazy{Value}.map{|value| [:quote, value] }
   Quasiquoted = char("`") >> lazy{Value}.map{|value| [:quasiquote, value]}
-  Commaed = char(",") >> lazy{Value}.map{|value| [:comma_, value]}
+  Unquoted = char(",") >> lazy{Value}.map{|value| [:unquote, value]}
   Commented = char(";") >> lazy{Value}.map{|value| nil}
-  Value = whitespace.many_ >> alt(Quoted, Quasiquoted, Commaed, Commented, List, Vector, String, Symbol, Number) << whitespace.many_
+  Value = whitespace.many_ >> alt(Quoted, Quasiquoted, Unquoted, Commented, List, Vector, Hash, String, Symbol, Number) << whitespace.many_
   Values = Value.many
   Parser = Values << eof
 

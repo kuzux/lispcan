@@ -191,7 +191,7 @@ end
 
 def quasiquote env, forms, exp
   if exp.is_a? Cons
-    if exp.car == :comma_
+    if exp.car == :unquote
       exp.cdr.car.lispeval(env,forms)
     else
       exp.arrayify.map do |e|
@@ -213,14 +213,27 @@ class Array
   end
 end
 
-DEFAULTS = {
-  :nil => :nil,
-  :t => :t,
-  :list => lambda {|*args| args.size == 1 ? args.first.consify : args.consify },
-}
+class Hash
+  def self.from_cons cns
+    self[*cns.arrayify]
+	end
 
+	def to_sexp
+    "{#{map{|k,v| "#{k} #{v}"}.join(" ")}}"
+	end
+end
+
+DEFAULTS = {}
 FORMS = {
-  :quote => lambda{|env,forms,exp| exp},
+  :quote => lambda do |env,forms,exp|
+    if exp.is_a?(Cons) && exp.car==:vector
+			Cons.new(:"quoted-vector",exp.cdr).lispeval(env,forms)
+		elsif exp.is_a?(Cons) && exp.car==:hash
+			Cons.new(:"quoted-hash",exp.cdr).lispeval(env,forms)
+		else
+			exp
+		end
+	end,
   :quasiquote => lambda {|env,forms,exp| quasiquote(env,forms,exp)},
   :define => lambda {|env,forms,sym,value| env.define(sym,value.lispeval(env,forms))},
   :set_ => lambda{|env,forms,sym,value| env.set(sym.to_sym,value.lispeval(env,forms))},
