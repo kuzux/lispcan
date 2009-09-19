@@ -1,7 +1,7 @@
-(defun + (x y) (. x + y))
-(defun - (x y) (. x - y))
-(defun * (x y) (. x * y))
-(defun / (x y) (. x / y))
+(defun + (init @args) (fold (\ (x y) (. x + y)) init args))
+(defun - (init @args) (fold (\ (x y) (. x - y)) init args))
+(defun * (init @args) (fold (\ (x y) (. x * y)) init args))
+(defun / (init @args) (fold (\ (x y) (. x / y)) init args))
 (defun mod (x y) (. x % y))
 
 (defun & (x y) (. x & y))

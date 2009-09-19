@@ -47,8 +47,8 @@
 		(cons ':: (cons acc curr))) `(ruby ,init) stuff))
 
 (defun read-file (filename) (. (ruby File) read filename))
-(defun parse (str) (. *interpreter_* parse str))
-(defun load (filename) (. *interpreter_* load_file filename))
+(defun parse (str) (. *interpreter* parse str))
+(defun load (filename) (. *interpreter* load_file filename))
 
 (load "math.lisp")
 (load "comp.lisp")
