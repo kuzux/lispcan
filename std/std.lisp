@@ -38,9 +38,13 @@
       `(let1 ,binding ,acc))
     body bindings))
 
-(defun .. (init @msgs)
+(defmacro .. (init @msgs)
   (foldr (lambda (msg acc)
-    (cons '. (cons (acc msg)))) init msgs))
+    (cons '. (cons acc msg))) init msgs))
+
+(defmacro ::: (init @stuff)
+  (foldr (lambda (curr acc)
+		(cons ':: (cons acc curr))) `(ruby ,init) stuff))
 
 (defun read-file (filename) (. (ruby File) read filename))
 (defun parse (str) (. *interpreter_* parse str))
@@ -50,6 +54,7 @@
 (load "comp.lisp")
 (load "list.lisp")
 (load "func.lisp")
+(load "exception.lisp")
 (load "vector.lisp")
 (load "hash.lisp")
 (load "doc.lisp")
@@ -63,6 +68,7 @@
        (defun (to-sym (+ "is-" (+ ,name "?"))) (x) (= (. x class) str)))))
 
 (defun regexp (rx) (. (ruby Regexp) new rx))
+(defun esc-regexp (rx) (. (ruby Regexp) escape rx))
 (defun match? (str regex) (. str =~ regex))
 (defun sub (str regex rep) (. str sub regex rep))
 (defun gsub (str regex rep) (. str gsub regex rep))

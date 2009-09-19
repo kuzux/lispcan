@@ -68,7 +68,7 @@ class Lambda
     end
     
     #@env.define(:"ASD", lambda{|*args| self.call(*args)})
-    @env.lookup(:"*interpreter_*").push(:"<LAMBDA>") if @st
+    @env.lookup(:"*interpreter*").push(:"<LAMBDA>") if @st
     
     newenv = Env.new(@env)
     newforms = Env.new(@forms)
@@ -90,7 +90,7 @@ class Lambda
     if res==true||res==false||res==nil
       res = res.to_sym
     end
-    @env.lookup(:"*interpreter_*").pop if @st
+    @env.lookup(:"*interpreter*").pop if @st
     
     res
   end
@@ -140,9 +140,9 @@ class Cons
     return forms.lookup(car).call(env, forms, *cdr.arrayify) if forms && forms.defined?(car)
     func = car.lispeval(env,forms)
     args = cdr.arrayify.map{|x| x.lispeval(env,forms)}
-    env.lookup(:"*interpreter_*").stack_trace << car
+    env.lookup(:"*interpreter*").stack_trace << car
     res = func.call(*args)
-    env.lookup(:"*interpreter_*").stack_trace.pop
+    env.lookup(:"*interpreter*").stack_trace.pop
     res
   end
 end
@@ -238,6 +238,14 @@ FORMS = {
   :define => lambda {|env,forms,sym,value| env.define(sym,value.lispeval(env,forms))},
   :set_ => lambda{|env,forms,sym,value| env.set(sym.to_sym,value.lispeval(env,forms))},
   :if => lambda{|env,forms,cond,xthen,xelse| (cond.lispeval(env,forms) != :nil) ? xthen.lispeval(env,forms) : xelse.lispeval(env,forms)},
+	:try_ => lambda do |env,forms,code,exc,rblock| 
+		begin 
+		  code.lispeval(env,forms)
+		rescue exc.lispeval(env,forms) => e
+		  env.define(:"*exception*", e)
+			rblock.lispeval(env,forms)
+		end
+	end,
   :do => lambda{|env,forms,cond,body| body.lispeval(env,forms) while (cond.lispeval(env,forms) != :nil)},
   :lambda => lambda{|env,forms,args,*code| Lambda.new(env,forms,args,true,*code)},
   :defmacro_ => lambda do |env,forms,name,exp|
@@ -263,7 +271,7 @@ class Interpreter
   def initialize defaults = DEFAULTS, forms = FORMS, stdlib = STDLIB
     @env = Env.new nil, defaults
     @forms = Env.new nil, forms
-    @env.define(:"*interpreter_*",self)
+    @env.define(:"*interpreter*",self)
     @loadpath = [File.join(File.dirname(__FILE__), "std")]
     @stack_trace = [:"TOPLEVEL"]
     load_file stdlib
@@ -290,12 +298,12 @@ class Interpreter
       @env.all_keys.select{|x| x.to_s =~ /^#{Regexp.escape(start)}/} + @forms.all_keys.select{|x| x.to_s =~ /^#{Regexp.escape(start)}/}
     end
     while line = Readline.readline("> ",true)
-      begin
+			begin
         puts self.eval(line).to_sexp
-      rescue StandardError => e
-        puts "ERROR: #{e}"
-        puts @stack_trace.to_sexp
-      end
+			rescue StandardError => e
+				puts "ERROR: #{e}"
+				puts @stack_trace.to_sexp
+			end
     end
   end
   
