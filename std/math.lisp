@@ -1,5 +1,6 @@
 (defun + (init @args) (fold (\ (x y) (. x + y)) init args))
-(defun - (init @args) (fold (\ (x y) (. x - y)) init args))
+(defun -l (init @args) (fold (\ (x y) (. x - y)) init args))
+(defun - (@args) (if (= (cdr args) nil) (-l 0 (car args)) (eval (cons '-l args))))
 (defun * (init @args) (fold (\ (x y) (. x * y)) init args))
 (defun / (init @args) (fold (\ (x y) (. x / y)) init args))
 (defun mod (x y) (. x % y))

@@ -31,5 +31,5 @@
           acc))
     '() lst))
 
-(defun min (lst) (fold (lambda (old new) (if (< old new) old new)) (car lst) (cdr lst)))
-(defun max (lst) (fold (lambda (old new) (if (> old new) old new)) (car lst) (cdr lst)))
+(defun min (lst) (fold (\ (old new) (if (< old new) old new)) (car lst) (cdr lst)))
+(defun max (lst) (fold (\ (old new) (if (> old new) old new)) (car lst) (cdr lst)))

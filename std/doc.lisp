@@ -8,4 +8,4 @@
 (define help doc)
 
 (document-fn 'document-fn "(fns doc) => Document the function/list of functions fns with the docstring doc")
-(document-fn '(doc help) "(fn) => learn about the function fn")
+(document-fn '(doc help) "(fn) => Learn about the function fn")
